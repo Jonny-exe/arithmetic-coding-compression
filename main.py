@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-from bigfloat import *
+from collections import Counter
 def bin2float (b):
     s, f = b.find('.')+1, int(b.replace('.',''), 2)
     return f/2.**(len(b)-s) if s else f
@@ -43,11 +43,7 @@ def write():
 
 def get_table():
     table = {}
-    for c in f:
-        if c in table:
-            table[c] += 1
-        else:
-            table[c] = 1
+    table = Counter(list(f))
 
     last = 0
     l = len(f)
@@ -77,7 +73,9 @@ def encode(f):
         c = table[c]
         start = new_point(start, end, c[0])
         end = new_point(start, end, c[1])
+        # start, end = normalize(start, end) Not working yet
         print("s:", start)
+
 
 
     print(start)
@@ -88,6 +86,41 @@ def reverse_table(table):
     for key in table:
         new_table[table[key]] = key
     return new_table
+
+def normalize(start, end):
+    current = 0
+    equal = True
+    decimal_i = 1
+    result = [start, end]
+    print("B: ", result)
+
+    while True:
+        v1 = str(start)
+        v2 = str(end)
+
+        i1 = v1.find(".")
+        i2 = v2.find(".")
+
+        try:
+            c1 = v1[i1 + decimal_i]
+            c2 = v2[i2 + decimal_i]
+            print(c1, c2)
+        except IndexError:
+            break
+
+        if c1 != c2:
+            break
+
+        common = int(c1) / pow(10, decimal_i)
+
+        result[0] = (start - common) * 10
+        result[1] = (end - common) * 10
+        decimal_i += 1
+        #FIXME: this works but it doesnj't yet integrate with the encoder nor the decoder
+
+    print("E: ", result)
+    return result[0], result[1]
+
 
 
 def new_point2(s, e, p):
