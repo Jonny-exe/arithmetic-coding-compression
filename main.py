@@ -62,6 +62,7 @@ def new_point(s, e, p):
 
 def encode(f):
     print("encoded: ", f)
+    SCALE = 1
     table = get_table()
     l = len(f)
     start = 0
@@ -73,13 +74,11 @@ def encode(f):
         c = table[c]
         start = new_point(start, end, c[0])
         end = new_point(start, end, c[1])
-        # start, end = normalize(start, end) Not working yet
-        print("s:", start)
+        # Not working yet
+        start, end, SCALE = normalize(start, end, SCALE)
 
-
-
-    print(start)
-    return start
+    print("f: ", start)
+    return start, SCALE
 
 def reverse_table(table):
     new_table = {}
@@ -87,12 +86,11 @@ def reverse_table(table):
         new_table[table[key]] = key
     return new_table
 
-def normalize(start, end):
+def normalize(start, end, SCALE):
     current = 0
     equal = True
     decimal_i = 1
     result = [start, end]
-    print("B: ", result)
 
     while True:
         v1 = str(start)
@@ -104,22 +102,26 @@ def normalize(start, end):
         try:
             c1 = v1[i1 + decimal_i]
             c2 = v2[i2 + decimal_i]
-            print(c1, c2)
         except IndexError:
             break
 
         if c1 != c2:
+            break
+        print("v1: ", v1)
+        print("v2: ", v2)
+        if c1 != "0":
             break
 
         common = int(c1) / pow(10, decimal_i)
 
         result[0] = (start - common) * 10
         result[1] = (end - common) * 10
+        SCALE *= 10
         decimal_i += 1
-        #FIXME: this works but it doesnj't yet integrate with the encoder nor the decoder
+        print("normalized")
+        #FIXME: this works but it doesn't yet integrate with the encoder nor the decoder
 
-    print("E: ", result)
-    return result[0], result[1]
+    return result[0], result[1], SCALE
 
 
 
@@ -128,10 +130,11 @@ def new_point2(s, e, p):
     return w * p + s
 
 
-def decode(encoded, l):
+def decode(encoded, l, SCALE):
+    print("SCALE: ", SCALE)
     table = get_table()
     start = 0
-    end = 1
+    end = 1 * SCALE
     i = 0
     decoded = ""
 
@@ -139,9 +142,7 @@ def decode(encoded, l):
         for key in table.keys():
             r = table[key]
             s, e = r[0], r[1]
-            print(new_point2(start, e, s))
             if encoded >= new_point2(start, end, s) and encoded < new_point2(start, end, e):
-                print("HELLO")
                 decoded += key
                 start = new_point(start, end, s)
                 end = new_point(start, end, e)
@@ -158,12 +159,12 @@ def get_decimals(n):
 
 # Decoding theory
 # Check each iteration
-# -> Take number and check where it fits in the ranges
-# -> then update ranges
-# -> check again
+# --> Take number and check where it fits in the ranges
+# --> then update ranges
+# --> check again
 
-a = encode(f)
-print("decoded: ", decode(a, l))
+a, SCALE = encode(f)
+print("decoded: ", decode(a, l, SCALE))
 
 
 
