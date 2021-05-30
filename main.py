@@ -99,9 +99,7 @@ def encode(f):
         start, end, output = normalize(start1, end1)
         outputs += output
 
-    print("outputs: ", outputs)
     print("fs: ", start)
-    print("fe: ", end)
     return outputs + float2bin(start)
 
 
@@ -114,13 +112,16 @@ def decode(encoded, l, f):
     i = 0
     decoded = ""
 
+    print(table.keys())
     while i < l:
         for key in table.keys():
             r = table[key]
+            print("ranges: ", key, r)
             s, e = r[0], r[1]
-            if encoded >= new_point(start, end, s) and encoded < new_point(
-                start, end, e
-            ):
+            print("NEWPÔINT: ", f"[{new_point(start, end, s)},{new_point(start, end, e)})")
+            bigger = new_point(start, end, s) - Decimal("5e-200")
+            smaller = new_point(start, end, e) - Decimal("5e-200")
+            if encoded >= bigger and encoded < smaller:
                 decoded += key
                 start1 = new_point(start, end, s)
                 end1 = new_point(start, end, e)
@@ -164,7 +165,7 @@ def normalize(initial_start, initial_end):
     return bin2float(PREFIX + start), bin2float(PREFIX + end), output
 
 
-f1 = open("index.html", "r").read()
+f1 = open("my_file", "r").read()
 f1 = f1[:1000]
 l = len(f1)
 a = encode(f1)
