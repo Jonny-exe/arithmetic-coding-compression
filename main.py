@@ -1,17 +1,20 @@
 #!/usr/bin/python3
-
 from collections import Counter
 import sys
+from decimal import Decimal, getcontext
+
+getcontext().prec = 200
 
 
-def float2bin(number, places=sys.float_info.epsilon):
-    rest = 0
+def float2bin(number, places=1e-200):
+    number = Decimal(str(number))
+    rest = Decimal("0")
     result = ""
     consecutive_zeros = 0
-    b = 1
+    b = Decimal("1")
     i = 1
     while b > places:
-        b = 2 ** -i
+        b = Decimal(str(2)) ** Decimal(str(-i))
         if b + rest <= number:
             result += "1"
             rest += b
@@ -23,14 +26,13 @@ def float2bin(number, places=sys.float_info.epsilon):
 
 def bin2float(number):
     # TODO: make this work with not only intervals from 0 to 1
-    result = 0.0
+    result = Decimal("0")
     number = number[number.find(".") + 1 :]
     for i in range(len(number)):
         c = number[i]
         if c == "1":
-            result += 2 ** -(i + 1)
+            result += Decimal(str(2)) ** Decimal(str(-(i + 1)))
     return result
-
 
 
 def genbits():
@@ -61,11 +63,12 @@ def write(bin_number):
     f = open("test.jz", "wb")
     f.write(b)
 
+
 def get_table(f):
     table = Counter(list(f))
 
-    last = 0
-    l = len(f)
+    last = Decimal("0")
+    l = Decimal(str(len(f)))
     for key in table:
         table[key] /= l
         table[key] += last
@@ -84,8 +87,8 @@ def encode(f):
     table = get_table(f)
     print("Alphabet size: ", len(table))
     l = len(f)
-    start = 0
-    end = 1
+    start = Decimal("0")
+    end = Decimal("1")
     i = 1
     ranges = table.items()
     outputs = ""
@@ -102,19 +105,12 @@ def encode(f):
     return outputs + float2bin(start)
 
 
-def reverse_table(table):
-    new_table = {}
-    for key in table:
-        new_table[table[key]] = key
-    return new_table
-
-
 def decode(encoded, l, f):
     encoded = bin2float("0." + encoded)
     print("Encoded: ", encoded)
     table = get_table(f)
-    start = 0
-    end = 1
+    start = Decimal("0")
+    end = Decimal("1")
     i = 0
     decoded = ""
 
@@ -122,7 +118,9 @@ def decode(encoded, l, f):
         for key in table.keys():
             r = table[key]
             s, e = r[0], r[1]
-            if encoded >= new_point(start, end, s) and encoded < new_point(start, end, e):
+            if encoded >= new_point(start, end, s) and encoded < new_point(
+                start, end, e
+            ):
                 decoded += key
                 start1 = new_point(start, end, s)
                 end1 = new_point(start, end, e)
@@ -136,6 +134,48 @@ def decode(encoded, l, f):
 def get_decimals(n):
     s = str(n)
     return s[::-1].find(".")
+
+
+def left_shift(bin_number, amount, position, places=30):
+    if position == "start":
+        adder = "0"
+    else:
+        adder = "1"
+    return bin_number[amount:] + adder * amount, bin_number[:amount]
+
+
+def normalize(initial_start, initial_end):
+    start, end = float2bin(initial_start), float2bin(initial_end)
+    amount = 0
+    # for s, e in zip(list(start), list(end)):
+    for i in range(len(start)):
+        s, e = start[i], end[i]
+        if s == e:
+            amount += 1
+        else:
+            break
+
+    if amount > 0:
+        start, output = left_shift(start, amount, "start")
+        end, _ = left_shift(end, amount, "end")
+    else:
+        return initial_start, initial_end, ""
+    PREFIX = "0."
+    return bin2float(PREFIX + start), bin2float(PREFIX + end), output
+
+
+f1 = open("index.html", "r").read()
+f1 = f1[:1000]
+l = len(f1)
+a = encode(f1)
+print("raw: ", f1)
+print("encoded: ", a)
+d = decode(a, l, f1)
+print("decoded: ", d)
+if f1 == d:
+    print("✅")
+else:
+    print("❌")
 
 
 """
@@ -154,52 +194,3 @@ Normalize
 -- check and shift (in type string)
 
 """
-
-
-def left_shift(bin_number, amount, position, places=30):
-    if position == "start":
-        adder = "0"
-    else:
-        adder = "1"
-    return bin_number[amount:] + adder * amount, bin_number[:amount]
-
-
-def normalize(initial_start, initial_end):
-    start, end = float2bin(initial_start), float2bin(initial_end)
-    amount = 0
-    for s, e in zip(list(start), list(end)):
-        if s == e:
-            amount += 1
-        else:
-            break
-
-    if amount > 0:
-        start, output = left_shift(start, amount, "start")
-        end, _ = left_shift(end, amount, "end")
-    else:
-        return initial_start, initial_end, ""
-    PREFIX = "0."
-    return bin2float(PREFIX + start), bin2float(PREFIX + end), output
-
-
-
-f1 = open("my_file", "r").read()
-l = len(f1)
-a = encode(f1)
-print("raw: ", f1)
-print("encoded: ", a)
-d = decode(a, l, f1)
-print("decoded: ",d)
-if f1 == d:
-    print("✅")
-else:
-    print("❌")
-
-
-f2 = open("test2", "r").read()
-l = len(f2)
-a = encode(f2)
-print("raw: ", f2)
-print("encoded: ", a)
-print("decoded: ", decode(a, l, f2))
-
