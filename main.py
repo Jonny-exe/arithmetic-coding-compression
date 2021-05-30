@@ -1,19 +1,23 @@
 #!/usr/bin/python3
+
 from collections import Counter
+import sys
 
 
-def float2bin(number, places=100):  # this is only for this usecase.
-    # TODO: make this usable for all usecases
+def float2bin(number, places=sys.float_info.epsilon):
     rest = 0
     result = ""
     consecutive_zeros = 0
-    for i in range(1, places + 1):
+    b = 1
+    i = 1
+    while b > places:
         b = 2 ** -i
         if b + rest <= number:
             result += "1"
             rest += b
         else:
             result += "0"
+        i += 1
     return result
 
 
@@ -27,16 +31,6 @@ def bin2float(number):
             result += 2 ** -(i + 1)
     return result
 
-
-def test():
-    f = open("my_file", "wb")
-    bi = [0b10001000, 0b01000100]
-
-    by = bytes(bi)
-    f.write(by)
-    f.close()
-
-    f = open("my_file", "rb")
 
 
 def genbits():
@@ -58,16 +52,16 @@ def genbits():
 # outputs = genbits()
 
 
-f = open("my_file", "r").read()
-l = len(f)
+def write(bin_number):
+    for c in bin_number:
+        # TODO
+        pritn()
+    b = bytes(a)
 
+    f = open("test.jz", "wb")
+    f.write(b)
 
-def write():
-    to_bin()
-    return
-
-
-def get_table():
+def get_table(f):
     table = Counter(list(f))
 
     last = 0
@@ -87,16 +81,15 @@ def new_point(s, e, p):
 
 
 def encode(f):
-    table = get_table()
+    table = get_table(f)
+    print("Alphabet size: ", len(table))
     l = len(f)
     start = 0
     end = 1
     i = 1
     ranges = table.items()
     outputs = ""
-    print(len(f))
     for c in f:
-        print(c)
         c = table[c]
         start1 = new_point(start, end, c[0])
         end1 = new_point(start, end, c[1])
@@ -104,7 +97,8 @@ def encode(f):
         outputs += output
 
     print("outputs: ", outputs)
-    print("f: ", start)
+    print("fs: ", start)
+    print("fe: ", end)
     return outputs + float2bin(start)
 
 
@@ -115,10 +109,10 @@ def reverse_table(table):
     return new_table
 
 
-def decode(encoded, l):
+def decode(encoded, l, f):
     encoded = bin2float("0." + encoded)
-    print(encoded)
-    table = get_table()
+    print("Encoded: ", encoded)
+    table = get_table(f)
     start = 0
     end = 1
     i = 0
@@ -181,7 +175,6 @@ def normalize(initial_start, initial_end):
 
     if amount > 0:
         start, output = left_shift(start, amount, "start")
-        print("normalize")
         end, _ = left_shift(end, amount, "end")
     else:
         return initial_start, initial_end, ""
@@ -189,7 +182,24 @@ def normalize(initial_start, initial_end):
     return bin2float(PREFIX + start), bin2float(PREFIX + end), output
 
 
-a = encode(f)
-print("raw: ", f)
+
+f1 = open("my_file", "r").read()
+l = len(f1)
+a = encode(f1)
+print("raw: ", f1)
 print("encoded: ", a)
-print("decoded: ", decode(a, l))
+d = decode(a, l, f1)
+print("decoded: ",d)
+if f1 == d:
+    print("✅")
+else:
+    print("❌")
+
+
+f2 = open("test2", "r").read()
+l = len(f2)
+a = encode(f2)
+print("raw: ", f2)
+print("encoded: ", a)
+print("decoded: ", decode(a, l, f2))
+
