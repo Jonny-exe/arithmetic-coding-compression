@@ -2,12 +2,30 @@
 from collections import Counter
 
 
-def bin2float(b):
-    s, f = b.find(".") + 1, int(b.replace(".", ""), 2)
-    return f / 2.0 ** (len(b) - s) if s else f
+def float2bin(number, places=100):  # this is only for this usecase.
+    # TODO: make this usable for all usecases
+    rest = 0
+    result = ""
+    consecutive_zeros = 0
+    for i in range(1, places + 1):
+        b = 2 ** -i
+        if b + rest <= number:
+            result += "1"
+            rest += b
+        else:
+            result += "0"
+    return result
 
 
-print(bin2float("0.0011101"))
+def bin2float(number):
+    # TODO: make this work with not only intervals from 0 to 1
+    result = 0.0
+    number = number[number.find(".") + 1 :]
+    for i in range(len(number)):
+        c = number[i]
+        if c == "1":
+            result += 2 ** -(i + 1)
+    return result
 
 
 def test():
@@ -21,7 +39,6 @@ def test():
     f = open("my_file", "rb")
 
 
-# fr = f.read()
 def genbits():
     # This returns each bit individually from all the bytes of the file
     for c in fr:
@@ -40,10 +57,8 @@ def genbits():
 
 # outputs = genbits()
 
-# Make a encoder, you'll need a batch size
 
 f = open("my_file", "r").read()
-# f = f[:2]
 l = len(f)
 
 
@@ -53,7 +68,6 @@ def write():
 
 
 def get_table():
-    table = {}
     table = Counter(list(f))
 
     last = 0
@@ -68,13 +82,11 @@ def get_table():
 
 
 def new_point(s, e, p):
-    # n =
     r = (e - s) * p + s
     return r
 
 
 def encode(f):
-    print("encoded: ", f)
     table = get_table()
     l = len(f)
     start = 0
@@ -84,11 +96,11 @@ def encode(f):
     outputs = ""
     print(len(f))
     for c in f:
+        print(c)
         c = table[c]
-        start = new_point(start, end, c[0])
-        end = new_point(start, end, c[1])
-        # Not working yet
-        start, end, output = normalize(start, end)
+        start1 = new_point(start, end, c[0])
+        end1 = new_point(start, end, c[1])
+        start, end, output = normalize(start1, end1)
         outputs += output
 
     print("outputs: ", outputs)
@@ -101,11 +113,6 @@ def reverse_table(table):
     for key in table:
         new_table[table[key]] = key
     return new_table
-
-
-def new_point2(s, e, p):
-    w = e - s
-    return w * p + s
 
 
 def decode(encoded, l):
@@ -121,12 +128,11 @@ def decode(encoded, l):
         for key in table.keys():
             r = table[key]
             s, e = r[0], r[1]
-            if encoded >= new_point2(start, end, s) and encoded < new_point2(
-                start, end, e
-            ):
+            if encoded >= new_point(start, end, s) and encoded < new_point(start, end, e):
                 decoded += key
-                start = new_point(start, end, s)
-                end = new_point(start, end, e)
+                start1 = new_point(start, end, s)
+                end1 = new_point(start, end, e)
+                start, end = start1, end1
                 break
 
         i += 1
@@ -154,20 +160,6 @@ Normalize
 -- check and shift (in type string)
 
 """
-
-
-def float2bin(number, places=30):  # this is only for this usecase.
-    rest = 0
-    result = ""
-    consecutive_zeros = 0
-    for i in range(1, places + 1):
-        b = 2 ** -i
-        if b + rest <= number:
-            result += "1"
-            rest += b
-        else:
-            result += "0"
-    return result
 
 
 def left_shift(bin_number, amount, position, places=30):
@@ -198,5 +190,6 @@ def normalize(initial_start, initial_end):
 
 
 a = encode(f)
+print("raw: ", f)
 print("encoded: ", a)
 print("decoded: ", decode(a, l))
