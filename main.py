@@ -1,12 +1,17 @@
 #!/usr/bin/python3
+from picke import dumps, loads
 from collections import Counter
 import sys
 from decimal import Decimal, getcontext
 
-getcontext().prec = 200
+FILENAME = "my_file"
+file_length = len(open(FILENAME).read())
+PRECISION = file_length
+getcontext().prec = PRECISION
+PRECISION_RANGE = pow(10, -PRECISION)
+PRECISION_RANGE_BIG = 10 * pow(10, -PRECISION)
 
-
-def float2bin(number, places=1e-200):
+def float2bin(number, places=PRECISION_RANGE):
     number = Decimal(str(number))
     rest = Decimal("0")
     result = ""
@@ -53,15 +58,36 @@ def genbits():
 
 # outputs = genbits()
 
+def write(bin_number, table):
+    # Header
+    # Make first 4 bits give how long the table is
+    by = []
+    by_i = 0
+    i = 0
+    l = len(bin_number)
+    rest = 8 - (l % 8)
+    while i < l:
+        if l < i + 8:
+            bit = int(bin_number[i:l] + rest * "0", 2)
+        else:
+            bit = int(bin_number[i:i+8], 2)
+        by.append(bit)
+        i += 8
 
-def write(bin_number):
-    for c in bin_number:
-        # TODO
-        pritn()
-    b = bytes(a)
+
+    table = dumps(table)
+    print(table)
+
 
     f = open("test.jz", "wb")
-    f.write(b)
+    f.write(bytes(table))
+    f.write(bytes(by))
+    f.close()
+
+def read():
+    f = open("test.jz", "wb")
+    table =loads(table_bin)
+    return
 
 
 def get_table(f):
@@ -100,6 +126,7 @@ def encode(f):
         outputs += output
 
     print("fs: ", start)
+    print("OUTPUTS: ", len(outputs))
     return outputs + float2bin(start)
 
 
@@ -116,11 +143,9 @@ def decode(encoded, l, f):
     while i < l:
         for key in table.keys():
             r = table[key]
-            print("ranges: ", key, r)
             s, e = r[0], r[1]
-            print("NEWPÔINT: ", f"[{new_point(start, end, s)},{new_point(start, end, e)})")
-            bigger = new_point(start, end, s) - Decimal("5e-200")
-            smaller = new_point(start, end, e) - Decimal("5e-200")
+            bigger = new_point(start, end, s) - Decimal(PRECISION_RANGE_BIG)
+            smaller = new_point(start, end, e) - Decimal(PRECISION_RANGE_BIG)
             if encoded >= bigger and encoded < smaller:
                 decoded += key
                 start1 = new_point(start, end, s)
@@ -165,18 +190,21 @@ def normalize(initial_start, initial_end):
     return bin2float(PREFIX + start), bin2float(PREFIX + end), output
 
 
-f1 = open("my_file", "r").read()
+table = get_table(f)
+f1 = open(FILENAME, "r").read()
 f1 = f1[:1000]
 l = len(f1)
 a = encode(f1)
 print("raw: ", f1)
-print("encoded: ", a)
+print("encoded: ", len(a), a)
 d = decode(a, l, f1)
 print("decoded: ", d)
 if f1 == d:
     print("✅")
 else:
     print("❌")
+
+write(a, table)
 
 
 """
@@ -195,3 +223,6 @@ Normalize
 -- check and shift (in type string)
 
 """
+
+
+
