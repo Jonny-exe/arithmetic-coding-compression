@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-from picke import dumps, loads
+from file import File
 from collections import Counter
 import sys
 from decimal import Decimal, getcontext
@@ -56,15 +56,12 @@ def genbits():
     f.close()
 
 
-# outputs = genbits()
-
-def write(bin_number, table):
-    # Header
-    # Make first 4 bits give how long the table is
-    by = []
+def save(bin_number, table):
     by_i = 0
     i = 0
+    by = []
     l = len(bin_number)
+    print("l", l)
     rest = 8 - (l % 8)
     while i < l:
         if l < i + 8:
@@ -74,20 +71,16 @@ def write(bin_number, table):
         by.append(bit)
         i += 8
 
+    print(by)
+    data = bytes(by)
+    print("data", type(data), data)
+    file = File("my_file")
+    file.save(data, table)
 
-    table = dumps(table)
-    print(table)
-
-
-    f = open("test.jz", "wb")
-    f.write(bytes(table))
-    f.write(bytes(by))
-    f.close()
-
-def read():
-    f = open("test.jz", "wb")
-    table =loads(table_bin)
-    return
+def load():
+    file = File("my_file")
+    data = file.load()
+    return data
 
 
 def get_table(f):
@@ -189,24 +182,6 @@ def normalize(initial_start, initial_end):
     PREFIX = "0."
     return bin2float(PREFIX + start), bin2float(PREFIX + end), output
 
-
-table = get_table(f)
-f1 = open(FILENAME, "r").read()
-f1 = f1[:1000]
-l = len(f1)
-a = encode(f1)
-print("raw: ", f1)
-print("encoded: ", len(a), a)
-d = decode(a, l, f1)
-print("decoded: ", d)
-if f1 == d:
-    print("✅")
-else:
-    print("❌")
-
-write(a, table)
-
-
 """
 Decoding theory
 Check each iteration
@@ -224,5 +199,24 @@ Normalize
 
 """
 
+if __name__ == "__main__":
+    filename = "my_file"
+    f = open(FILENAME, "r").read()
+    table = get_table(f)
+    f = f[:1000]
+    l = len(f)
+    encoded = encode(f)
+    print("raw: ", f)
+    print("encoded: ", len(encoded), encoded)
+
+    save(encoded, table)
+    encoded = load()
+    print("encoded", encoded)
+    d = decode(encoded, l, f)
+    print("decoded: ", d)
+    if f == d:
+        print("✅")
+    else:
+        print("❌")
 
 
