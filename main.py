@@ -4,12 +4,13 @@ from collections import Counter
 import sys
 from decimal import Decimal, getcontext
 
-FILENAME = "my_file"
+FILENAME = "index.html"
 file_length = len(open(FILENAME).read())
-PRECISION = file_length
-getcontext().prec = PRECISION
+PRECISION = 200
+getcontext().prec = 200
 PRECISION_RANGE = pow(10, -PRECISION)
 PRECISION_RANGE_BIG = 10 * pow(10, -PRECISION)
+
 
 def float2bin(number, places=PRECISION_RANGE):
     number = Decimal(str(number))
@@ -67,18 +68,19 @@ def save(bin_number, table):
         if l < i + 8:
             bit = int(bin_number[i:l] + rest * "0", 2)
         else:
-            bit = int(bin_number[i:i+8], 2)
+            bit = int(bin_number[i : i + 8], 2)
         by.append(bit)
         i += 8
 
     print(by)
     data = bytes(by)
     print("data", type(data), data)
-    file = File("my_file")
+    file = File("index.html")
     file.save(data, table)
 
+
 def load():
-    file = File("my_file")
+    file = File("index.html")
     data = file.load()
     return data
 
@@ -124,7 +126,11 @@ def encode(f):
 
 
 def decode(encoded, l, f):
-    encoded = bin2float("0." + encoded)
+    fullencoded = encoded
+    print(len(fullencoded))
+    encoded_i = (0, 50)
+    encoded = "0." + encoded[encoded_i[0] : encoded_i[1]]
+    encoded = bin2float(encoded)
     print("Encoded: ", encoded)
     table = get_table(f)
     start = Decimal("0")
@@ -137,13 +143,18 @@ def decode(encoded, l, f):
         for key in table.keys():
             r = table[key]
             s, e = r[0], r[1]
-            bigger = new_point(start, end, s) - Decimal(PRECISION_RANGE_BIG)
-            smaller = new_point(start, end, e) - Decimal(PRECISION_RANGE_BIG)
+            # bigger = new_point(start, end, s) - Decimal(PRECISION_RANGE_BIG)
+            # smaller = new_point(start, end, e) - Decimal(PRECISION_RANGE_BIG)
+            bigger = new_point(start, end, s)
+            smaller = new_point(start, end, e)
             if encoded >= bigger and encoded < smaller:
                 decoded += key
                 start1 = new_point(start, end, s)
                 end1 = new_point(start, end, e)
-                start, end = start1, end1
+                start, end, encoded, encoded_i = de_normalize(
+                    start1, end1, encoded, numberindex=encoded_i, fullnumber=fullencoded
+                )
+                print(encoded_i)
                 break
 
         i += 1
@@ -155,11 +166,16 @@ def get_decimals(n):
     return s[::-1].find(".")
 
 
-def left_shift(bin_number, amount, position, places=30):
+def left_shift(bin_number, amount, position, fullnumber="", numberindex=0):
     if position == "start":
         adder = "0"
-    else:
+    elif position == "end":
         adder = "1"
+    elif position == "number":
+        numberstart, numberend = numberindex
+        return fullnumber[numberstart:numberend], ""
+    else:
+        adder = ""
     return bin_number[amount:] + adder * amount, bin_number[:amount]
 
 
@@ -182,28 +198,56 @@ def normalize(initial_start, initial_end):
     PREFIX = "0."
     return bin2float(PREFIX + start), bin2float(PREFIX + end), output
 
-"""
-Decoding theory
-Check each iteration
--- Take number and check where it fits in the ranges
--- then update ranges
--- check again
-"""
+def de_normalize(initial_start, initial_end, initial_number, fullnumber, numberindex):
+    start, end, number = (
+        float2bin(initial_start),
+        float2bin(initial_end),
+        float2bin(initial_number),
+    )
+    # print("de start", start)
+    amount = 0
+    # for s, e in zip(list(start), list(end)):
+    for i in range(len(start)):
+        s, e, n = start[i], end[i], number[i]
+        if s == e and s == n:
+            amount += 1
+        else:
+            break
 
+    # print("amount", amount)
+    if amount > 0:
+        numberindex = numberindex[0] + amount, numberindex[1] + amount
 
-"""
-Normalize
+        start, _ = left_shift(start, amount, "start")
+        end, _ = left_shift(end, amount, "end")
+        number, _ = left_shift(
+            number, amount, "number", fullnumber=fullnumber, numberindex=numberindex
+        )
+    else:
+        return initial_start, initial_end, initial_number, numberindex
+    PREFIX = "0."
 
--- float2bin (bin type string)
--- check and shift (in type string)
+    # print(
+        # "Initial",
+        # float2bin(initial_start)[0:10],
+        # float2bin(initial_end)[0:10],
+        # float2bin(initial_number)[0:10],
+    # )
+    # print("Not initial", start[0:10], end[0:10], number[0:10])
 
-"""
+    return (
+        bin2float(PREFIX + start),
+        bin2float(PREFIX + end),
+        bin2float(PREFIX + number),
+        numberindex,
+    )
+
 
 if __name__ == "__main__":
-    filename = "my_file"
+    filename = "index.html"
     f = open(FILENAME, "r").read()
     table = get_table(f)
-    f = f[:1000]
+    f = f[:139]
     l = len(f)
     encoded = encode(f)
     print("raw: ", f)
@@ -218,5 +262,3 @@ if __name__ == "__main__":
         print("✅")
     else:
         print("❌")
-
-
