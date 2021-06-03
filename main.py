@@ -4,22 +4,22 @@ from collections import Counter
 import sys
 from decimal import Decimal, getcontext
 
-FILENAME = "index.html"
+FILENAME = "index350.html"
 file_length = len(open(FILENAME).read())
 PRECISION = 200
 getcontext().prec = 200
-PRECISION_RANGE = pow(10, -PRECISION)
+PRECISION_RANGE = pow(200, -PRECISION)
 PRECISION_RANGE_BIG = 10 * pow(10, -PRECISION)
 
 
-def float2bin(number, places=PRECISION_RANGE):
+def float2bin(number, places=600):
     number = Decimal(str(number))
     rest = Decimal("0")
     result = ""
     consecutive_zeros = 0
     b = Decimal("1")
     i = 1
-    while b > places:
+    while i < places:
         b = Decimal(str(2)) ** Decimal(str(-i))
         if b + rest <= number:
             result += "1"
@@ -75,28 +75,33 @@ def save(bin_number, table):
     print(by)
     data = bytes(by)
     print("data", type(data), data)
-    file = File("index.html")
+    file = File(FILENAME)
     file.save(data, table)
 
 
 def load():
-    file = File("index.html")
+    file = File(FILENAME)
     data = file.load()
     return data
 
 
 def get_table(f):
     table = Counter(list(f))
+    return dict(table)
 
+def get_table_probabilities(table):
     last = Decimal("0")
     l = Decimal(str(len(f)))
+
     for key in table:
         table[key] /= l
         table[key] += last
         temp = table[key]
         table[key] = (last, temp)  # Keep a range of (start, end)
         last = temp
+
     return table
+
 
 
 def new_point(s, e, p):
@@ -106,6 +111,7 @@ def new_point(s, e, p):
 
 def encode(f):
     table = get_table(f)
+    table = get_table_probabilities(table)
     print("Alphabet size: ", len(table))
     l = len(f)
     start = Decimal("0")
@@ -120,19 +126,23 @@ def encode(f):
         start, end, output = normalize(start1, end1)
         outputs += output
 
+    final = ((end - start) / Decimal("2")) + start
     print("fs: ", start)
-    print("OUTPUTS: ", len(outputs))
-    return outputs + float2bin(start)
+    print("type", type(start), start)
+    print("LENGTHS     : ", len(outputs), len(float2bin(start)))
+    return outputs + float2bin(final)
+    # return outputs
 
 
 def decode(encoded, l, f):
     fullencoded = encoded
     print(len(fullencoded))
-    encoded_i = (0, 50)
+    encoded_i = (0, 600)
     encoded = "0." + encoded[encoded_i[0] : encoded_i[1]]
     encoded = bin2float(encoded)
     print("Encoded: ", encoded)
     table = get_table(f)
+    table = get_table_probabilities(table)
     start = Decimal("0")
     end = Decimal("1")
     i = 0
@@ -154,7 +164,6 @@ def decode(encoded, l, f):
                 start, end, encoded, encoded_i = de_normalize(
                     start1, end1, encoded, numberindex=encoded_i, fullnumber=fullencoded
                 )
-                print(encoded_i)
                 break
 
         i += 1
@@ -244,16 +253,18 @@ def de_normalize(initial_start, initial_end, initial_number, fullnumber, numberi
 
 
 if __name__ == "__main__":
-    filename = "index.html"
     f = open(FILENAME, "r").read()
     table = get_table(f)
-    f = f[:139]
+    table = get_table_probabilities(table)
+    # f = f[:350]
+    print("fl", len(f))
     l = len(f)
     encoded = encode(f)
     print("raw: ", f)
     print("encoded: ", len(encoded), encoded)
 
-    save(encoded, table)
+    simple_table = get_table(f)
+    save(encoded, simple_table )
     encoded = load()
     print("encoded", encoded)
     d = decode(encoded, l, f)
