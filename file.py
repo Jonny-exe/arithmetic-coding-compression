@@ -27,16 +27,20 @@ class File:
             return
 
         f.seek(8)
+        lb = f.read(4)
+        l = struct.unpack("!I", lb)[0]
+
+        f.seek(12)
         tablelb = f.read(4)
         tablel = struct.unpack("!I", tablelb)[0]
-        f.seek(12)
+        f.seek(16)
         tableb = f.read(tablel)
         table = pickle.loads(tableb)
 
-        f.seek(12 + tablel)
+        f.seek(16 + tablel)
         data = f.read()
         data = self.data_to_bin(data)
-        return data
+        return data, table, l
 
     def data_to_bin(self, data):
         result = ""
@@ -47,7 +51,7 @@ class File:
         return result
 
 
-    def save(self, data, table):
+    def save(self, data, table, l):
         f = open(self.filename + ".jzip", "wb")
 
         s = "JZIP"
@@ -56,12 +60,17 @@ class File:
         n = struct.pack("!I", 1)
         f.write(n)
 
-        table = pickle.dumps(table)
-        l = struct.pack("!I", len(table))
+        l = struct.pack("!I", l)
         f.write(l)
+
+        print("table", table)
+        table = pickle.dumps(table)
+        print("table", len(table))
+        tablel = struct.pack("!I", len(table))
+
+        f.write(tablel)
         f.write(table)
         f.write(data)
 
         f.close()
-
 
