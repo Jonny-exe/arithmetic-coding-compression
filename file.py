@@ -1,13 +1,10 @@
 import pickle
 import sys
-from decimal import Decimal, getcontext
 import struct
 
 class File:
     def __init__(self, filename):
         self.filename = filename
-        PRECISION = len(open(self.filename).read())
-        getcontext().prec = PRECISION
 
     def load(self):
         f = open(self.filename + ".jzip", "rb")

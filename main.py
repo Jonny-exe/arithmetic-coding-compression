@@ -1,10 +1,11 @@
 #!/usr/bin/python3
+import argparse
 from file import File
 from coder import Coder
 
 FILENAME = "test"
 
-def save(bin_number, table, length):
+def save(FILENAME, bin_number, table, length):
     by_i = 0
     i = 0
     by = []
@@ -23,26 +24,37 @@ def save(bin_number, table, length):
     file.save(data, table, length)
 
 
-def load():
+def load(FILENAME):
     file = File(FILENAME)
     data, table, l = file.load()
     return data, table, l
 
 if __name__ == "__main__":
-    input_string = open(FILENAME).read()
-    coder = Coder(input_string, "encode", l=len(input_string))
-    output, l, table = coder.output, coder.l, coder.table
-    print("L output", len(output))
-    save(output, table, l)
+    parser = argparse.ArgumentParser(description="JZIP")
+    parser.add_argument("-d")
+    parser.add_argument("-e", type=str)
+    args = parser.parse_args()
 
-    data, table, l = load()
-    coder = Coder(data, "decode", table=table, l=l)
-    if input_string == coder.output:
-        print("✅")
+    print(args.e)
+    if args.e is not None:
+        FILENAME = args.e
+        input_string = open(FILENAME).read()
+        coder = Coder(input_string, "encode", l=len(input_string))
+        output, l, table = coder.output, coder.l, coder.table
+        print("L output", len(output))
+        save(FILENAME, output, table, l)
     else:
+        FILENAME = args.d
+        data, table, l = load(FILENAME)
+        coder = Coder(data, "decode", table=table, l=l)
         print("output", coder.output)
-        print("❌")
-    print("COMPARE")
-    print(input_string[-50:])
-    print(coder.output[-50:])
+        open(FILENAME + ".out", "w").write(coder.output).close()
+    # if input_string == coder.output:
+    # print("✅")
+    # else:
+    # print("output", coder.output)
+    # print("❌")
+    # print("COMPARE")
+    # print(input_string[-50:])
+    # print(coder.output[-50:])
 
