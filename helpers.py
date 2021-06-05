@@ -1,7 +1,7 @@
 from decimal import Decimal, getcontext
-getcontext().prec = 200
+getcontext().prec = 15
 
-def float2bin(number, places=600):
+def float2bin(number, places=50):
     number = Decimal(str(number))
     rest = Decimal("0")
     result = ""

@@ -5,20 +5,18 @@ from decimal import Decimal, getcontext
 from collections import Counter
 class Coder:
     def __init__(self, input_string, action, table={}, l=0):
-        getcontext().prec = 200
+        getcontext().prec = 15
         self.l = l
         print("l: ", self.l)
         if action == "encode":
             self.table = self.get_table(input_string)
+            print("table l",len(self.table))
             probability_table = self.get_table_probabilities(deepcopy(self.table))
             self.output = self.encode(input_string, probability_table)
         elif action == "decode":
             self.input_l = len(input_string)
             self.table = self.get_table_probabilities(table)
             self.output = self.decode(input_string, self.table)
-
-
-
 
     def decode(self, encoded, table):
         fullencoded = encoded
@@ -30,8 +28,9 @@ class Coder:
         end = Decimal("1")
         i = 0
         decoded = ""
-        print(table.keys())
         while i < self.l:
+            if i % 5000 == 0:
+                print(f"{i} / {self.l}")
             for key in table.keys():
                 r = table[key]
                 s, e = r[0], r[1]
@@ -53,7 +52,7 @@ class Coder:
     def encode(self, text, table):
         start = Decimal("0")
         end = Decimal("1")
-        i = 1
+        i = 0
         ranges = table.items()
         outputs = ""
         for c in text:
@@ -62,12 +61,17 @@ class Coder:
             end1 = self.new_point(start, end, c[1])
             start, end, output = self.en_normalize(start1, end1)
             outputs += output
+            if i % 100000 == 0:
+                print(f"{i} / {self.l}")
+            if i + 10 > self.l:
+                getcontext().prec = 200
+            i += 1
 
         final = ((end - start) / Decimal("2")) + start
         print("fs: ", start)
         print("type", type(start), start)
         print("LENGTHS     : ", len(outputs), len(float2bin(start)))
-        return outputs + float2bin(final)
+        return outputs + float2bin(final, places=600)
         # return outputs
 
 

@@ -63,9 +63,8 @@ class File:
         l = struct.pack("!I", l)
         f.write(l)
 
-        print("table", table)
         table = pickle.dumps(table)
-        print("table", len(table))
+        print("table l:", len(table))
         tablel = struct.pack("!I", len(table))
 
         f.write(tablel)

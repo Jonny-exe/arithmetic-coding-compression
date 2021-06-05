@@ -2,7 +2,7 @@
 from file import File
 from coder import Coder
 
-FILENAME = "index.html"
+FILENAME = "test"
 
 def save(bin_number, table, length):
     by_i = 0
@@ -30,12 +30,10 @@ def load():
 
 if __name__ == "__main__":
     input_string = open(FILENAME).read()
-    print("input", input_string)
     coder = Coder(input_string, "encode", l=len(input_string))
     output, l, table = coder.output, coder.l, coder.table
     print("L output", len(output))
     save(output, table, l)
-    print("table", table)
 
     data, table, l = load()
     coder = Coder(data, "decode", table=table, l=l)
@@ -44,8 +42,7 @@ if __name__ == "__main__":
     else:
         print("output", coder.output)
         print("❌")
-
-
-    # coder = Coder(output, len(output), "decode")
-
+    print("COMPARE")
+    print(input_string[-50:])
+    print(coder.output[-50:])
 
