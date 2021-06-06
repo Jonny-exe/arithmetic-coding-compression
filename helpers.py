@@ -1,5 +1,7 @@
 from decimal import Decimal, getcontext
+
 getcontext().prec = 15
+
 
 def float2bin(number, places=50):
     number = Decimal(str(number))

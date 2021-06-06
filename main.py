@@ -5,6 +5,7 @@ from coder import Coder
 
 FILENAME = "test"
 
+
 def save(FILENAME, bin_number, table, length):
     by_i = 0
     i = 0
@@ -29,6 +30,7 @@ def load(FILENAME):
     data, table, l = file.load()
     return data, table, l
 
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="JZIP")
     parser.add_argument("-d")
@@ -48,13 +50,4 @@ if __name__ == "__main__":
         data, table, l = load(FILENAME)
         coder = Coder(data, "decode", table=table, l=l)
         print("output", coder.output)
-        open(FILENAME + ".out", "w").write(coder.output).close()
-    # if input_string == coder.output:
-    # print("✅")
-    # else:
-    # print("output", coder.output)
-    # print("❌")
-    # print("COMPARE")
-    # print(input_string[-50:])
-    # print(coder.output[-50:])
-
+        open(FILENAME + ".out", "w").write(coder.output)

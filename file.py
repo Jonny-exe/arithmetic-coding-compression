@@ -2,6 +2,7 @@ import pickle
 import sys
 import struct
 
+
 class File:
     def __init__(self, filename):
         self.filename = filename
@@ -10,7 +11,7 @@ class File:
         f = open(self.filename + ".jzip", "rb")
 
         ftypeb = f.read(4)
-        ftype = str(ftypeb , "utf-8")
+        ftype = str(ftypeb, "utf-8")
 
         if ftype != "JZIP":
             # Raise error
@@ -47,7 +48,6 @@ class File:
             result += b
         return result
 
-
     def save(self, data, table, l):
         f = open(self.filename + ".jzip", "wb")
 
@@ -69,4 +69,3 @@ class File:
         f.write(data)
 
         f.close()
-

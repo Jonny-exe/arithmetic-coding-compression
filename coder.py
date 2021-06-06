@@ -3,6 +3,8 @@ from copy import deepcopy
 from file import File
 from decimal import Decimal, getcontext
 from collections import Counter
+
+
 class Coder:
     def __init__(self, input_string, action, table={}, l=0):
         getcontext().prec = 15
@@ -10,17 +12,17 @@ class Coder:
         print("l: ", self.l)
         if action == "encode":
             self.table = self.get_table(input_string)
-            print("table l",len(self.table))
-            probability_table = self.get_table_probabilities(deepcopy(self.table))
+            print("table l", len(self.table))
+            probability_table = self.get_table_probabilities(deepcopy(self.table), self.l)
             self.output = self.encode(input_string, probability_table)
         elif action == "decode":
             self.input_l = len(input_string)
-            self.table = self.get_table_probabilities(table)
+            self.table = self.get_table_probabilities(table, self.l)
             self.output = self.decode(input_string, self.table)
 
     def decode(self, encoded, table):
         fullencoded = encoded
-        encoded_i = (0, 600)
+        encoded_i = (0, 300)
         encoded_number = "0." + encoded[encoded_i[0] : encoded_i[1]]
         encoded = bin2float(encoded_number)
         print("Encoded float: ", encoded)
@@ -41,30 +43,30 @@ class Coder:
                     start1 = self.new_point(start, end, s)
                     end1 = self.new_point(start, end, e)
                     start, end, encoded, encoded_i = self.de_normalize(
-                        start1, end1, encoded, numberindex=encoded_i, fullnumber=fullencoded
+                        start1,
+                        end1,
+                        encoded,
+                        numberindex=encoded_i,
+                        fullnumber=fullencoded,
                     )
                     break
 
             i += 1
-        print(encoded_i)
         return decoded
 
-    def encode(self, text, table):
+    def encode(self, text, probablity_table):
         start = Decimal("0")
         end = Decimal("1")
         i = 0
-        ranges = table.items()
         outputs = ""
         for c in text:
-            c = table[c]
-            start1 = self.new_point(start, end, c[0])
-            end1 = self.new_point(start, end, c[1])
+            ranges = probablity_table[c]
+            start1 = self.new_point(start, end, ranges[0])
+            end1 = self.new_point(start, end, ranges[1])
             start, end, output = self.en_normalize(start1, end1)
             outputs += output
             if i % 100000 == 0:
                 print(f"{i} / {self.l}")
-            if i + 10 > self.l:
-                getcontext().prec = 200
             i += 1
 
         final = ((end - start) / Decimal("2")) + start
@@ -74,21 +76,20 @@ class Coder:
         return outputs + float2bin(final, places=600)
         # return outputs
 
-
     def new_point(self, s, e, p):
         r = (e - s) * p + s
         return r
-
 
     def get_table(self, text):
         table = Counter(list(text))
         return dict(table)
 
-    def get_table_probabilities(self, table):
+    def get_table_probabilities(self, table, l):
+        table = deepcopy(table)
         last = Decimal("0")
 
         for key in table:
-            table[key] /= Decimal(self.l)
+            table[key] /= Decimal(l)
             table[key] += last
             temp = table[key]
             table[key] = (last, temp)  # Keep a range of (start, end)
@@ -106,7 +107,6 @@ class Coder:
         else:
             adder = ""
         return bin_number[amount:] + adder * amount, bin_number[:amount]
-
 
     def en_normalize(self, initial_start, initial_end):
         start, end = float2bin(initial_start), float2bin(initial_end)
@@ -126,7 +126,9 @@ class Coder:
         PREFIX = "0."
         return bin2float(PREFIX + start), bin2float(PREFIX + end), output
 
-    def de_normalize(self, initial_start, initial_end, initial_number, fullnumber, numberindex):
+    def de_normalize(
+        self, initial_start, initial_end, initial_number, fullnumber, numberindex
+    ):
         start, end, number = (
             float2bin(initial_start),
             float2bin(initial_end),
