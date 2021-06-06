@@ -1,6 +1,7 @@
 # arithmetic-coding-compression
 
 This is an implementation (written in pythyon) of arithmetic coding for compression.
+
 Note: this is not made for serious use
 
 The results of this encoder are:
