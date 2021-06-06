@@ -13,4 +13,5 @@ enwik5: 100k --> 63k
 
 TODO:
   - Make it so you can compress folders
+  - Make it work with files not encoded in utf-8
 
