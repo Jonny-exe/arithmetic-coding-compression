@@ -1,13 +1,11 @@
 from helpers import float2bin, bin2float
 from copy import deepcopy
 from file import File
-from decimal import Decimal, getcontext
 from collections import Counter
 
 
 class Coder:
     def __init__(self, input_string, action, table={}, l=0):
-        getcontext().prec = 15
         self.l = l
         print("l: ", self.l)
         if action == "encode":
@@ -26,8 +24,8 @@ class Coder:
         encoded_number = "0." + encoded[encoded_i[0] : encoded_i[1]]
         encoded = bin2float(encoded_number)
         print("Encoded float: ", encoded)
-        start = Decimal("0")
-        end = Decimal("1")
+        start = 0
+        end = 1
         i = 0
         decoded = ""
         while i < self.l:
@@ -55,8 +53,8 @@ class Coder:
         return decoded
 
     def encode(self, text, probablity_table):
-        start = Decimal("0")
-        end = Decimal("1")
+        start = 0
+        end = 1
         i = 0
         outputs = ""
         for c in text:
@@ -69,7 +67,7 @@ class Coder:
                 print(f"{i} / {self.l}")
             i += 1
 
-        final = ((end - start) / Decimal("2")) + start
+        final = ((end - start) / 2) + start
         print("fs: ", start)
         print("type", type(start), start)
         print("LENGTHS     : ", len(outputs), len(float2bin(start)))
@@ -86,10 +84,10 @@ class Coder:
 
     def get_table_probabilities(self, table, l):
         table = deepcopy(table)
-        last = Decimal("0")
+        last = 0
 
         for key in table:
-            table[key] /= Decimal(l)
+            table[key] /= l
             table[key] += last
             temp = table[key]
             table[key] = (last, temp)  # Keep a range of (start, end)
