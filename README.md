@@ -12,5 +12,5 @@ enwik5: 100k --> 63k
 ```
 
 TODO:
-  - Change table probabilities while encoding and decoding
+  - Make it so you can compress folders
 
