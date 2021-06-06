@@ -1,5 +1,0 @@
-numpy
-bigfloat
-
-# You also need everything mentioned here if your bigfloat installation fails
-# https://stackoverflow.com/questions/17409740/python-bigfloat-package-installation-issues
