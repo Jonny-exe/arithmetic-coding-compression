@@ -7,10 +7,8 @@ from collections import Counter
 class Coder:
     def __init__(self, input_string, action, table={}, l=0):
         self.l = l
-        print("l: ", self.l)
         if action == "encode":
             self.table = self.get_table(input_string)
-            print("table l", len(self.table))
             probability_table = self.get_table_probabilities(deepcopy(self.table), self.l)
             self.output = self.encode(input_string, probability_table)
         elif action == "decode":
@@ -23,7 +21,6 @@ class Coder:
         encoded_i = (0, 300)
         encoded_number = "0." + encoded[encoded_i[0] : encoded_i[1]]
         encoded = bin2float(encoded_number)
-        print("Encoded float: ", encoded)
         start = 0
         end = 1
         i = 0
@@ -68,9 +65,6 @@ class Coder:
             i += 1
 
         final = ((end - start) / 2) + start
-        print("fs: ", start)
-        print("type", type(start), start)
-        print("LENGTHS     : ", len(outputs), len(float2bin(start)))
         return outputs + float2bin(final, places=600)
         # return outputs
 

@@ -5,7 +5,6 @@ from coder import Coder
 
 FILENAME = "test"
 
-
 def save(FILENAME, bin_number, table, length):
     by_i = 0
     i = 0
@@ -33,11 +32,9 @@ def load(FILENAME):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="JZIP")
-    parser.add_argument("-d")
-    parser.add_argument("-e", type=str)
+    parser.add_argument("-d", help="decode")
+    parser.add_argument("-e", type=str, help="encode")
     args = parser.parse_args()
-
-    print(args.e)
     if args.e is not None:
         FILENAME = args.e
         input_string = open(FILENAME).read()
@@ -49,5 +46,4 @@ if __name__ == "__main__":
         FILENAME = args.d
         data, table, l = load(FILENAME)
         coder = Coder(data, "decode", table=table, l=l)
-        print("output", coder.output)
         open(FILENAME + ".out", "w").write(coder.output)
