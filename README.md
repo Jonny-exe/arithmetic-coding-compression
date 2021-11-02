@@ -25,5 +25,7 @@ optional arguments:
 TODO:
   - Make it so you can compress folders
   - Make it work with files not encoded in utf-8
+  - Make it for images
+  - Write in C++
 
 	
