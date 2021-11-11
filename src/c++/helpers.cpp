@@ -1,8 +1,10 @@
 #include<bits/stdc++.h>
 using namespace std;
 string float2bin(double number, int places) {
-  double rest = 0, b = 0;
-  int i = 0;
+  double rest, b;
+  rest = 0;
+  b = 1;
+  int i = 1;
   string result = "";
 
   while (i < places) {
