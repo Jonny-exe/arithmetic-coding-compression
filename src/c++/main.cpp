@@ -1,5 +1,6 @@
 #include<bits/stdc++.h>
 #include "helpers.cpp"
+#include "file.cpp"
 
 
 typedef map<char, pair<double, double>> ttable;
@@ -234,8 +235,10 @@ int main() {
   Coder en(text.length(), text, "encode");
   string out = en.output;
   cout << "output: " << out << endl;
+  File file("test");
+  file.write(en.pTable, en.output, (int)en.l);
+
   Coder de(out.length(), out, "decode", en.pTable);
   cout << "output: " << de.output << endl;
-
 }
 
