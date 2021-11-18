@@ -237,6 +237,7 @@ int main() {
   cout << "output: " << out << endl;
   File file("test");
   file.write(en.pTable, en.output, (int)en.l);
+  tuple<ttable, string> data = file.read();
 
   Coder de(out.length(), out, "decode", en.pTable);
   cout << "output: " << de.output << endl;

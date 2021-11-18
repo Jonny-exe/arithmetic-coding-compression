@@ -11,6 +11,7 @@ class Coder:
             self.table = self.get_table(input_string)
             probability_table = self.get_table_probabilities(deepcopy(self.table), self.l)
             self.output = self.encode(input_string, probability_table)
+            print(self.output)
         elif action == "decode":
             self.input_l = len(input_string)
             self.table = self.get_table_probabilities(table, self.l)

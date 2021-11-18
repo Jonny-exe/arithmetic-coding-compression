@@ -23,8 +23,10 @@ class File  {
 
       json jt = table;
       string js = jt.dump();
-      file << js.length(); //TODO: make sure this is written in binary and not in ascii
-      file << ";";
+      int jl = js.length();
+
+      file.write( reinterpret_cast<const char *>(&jl), sizeof(jl));
+      //TODO: make sure this is written in binary and not in ascii;
       file << js;
       file << l;
       for (int i = 0; i < encoded.length() % 8; i++) {
@@ -54,32 +56,31 @@ class File  {
       int p = 4;
 
       char name[p];
-      file.get(name, p);
-      string nameStr = str(name);
-      if (name != "JZIP") throw runtime_error("Header not valid");
+      file.get(name, p + 1);
+      string nameStr = name;
+      cout << "name: " << name << strcmp(name, "JZIP") << endl;
+      if (strcmp(name, "JZIP")) throw runtime_error("Header not valid");
       
       p++;
-      unsigned char version = file.get();
-      if (version != 2) throw runtime_error("Version not valid");
+      char version = file.get();
 
-      int tablel = 0;
-      unsigned char i;
-      while (i = file.get()) {
-        p++;
-        if (i == ';') {
-          break;
-        }
-        tablel += (int)i;
-      }
+      cout << "version: " << version << endl;
+      if (version == 2) throw runtime_error("Version not valid"); 
+      unsigned char * chars;
+      chars = new unsigned char[4];
+      file.read((char*)chars, 4);
 
-      char str[tablel];
-      file.get(str, tablel + p);
-      json jt = json.parse(str);
-      ttable table = jt.get<ttable>;
-      unsigned char encodedCh[file.tellg()];
-      file.get(encodedCh, file.tellg());
+      int tablel = (int)chars[0] + ((int)chars[1] << 8) + ((int)chars[2] << 16) + ((int)chars[3] << 24);
 
-      string encoded = str(encodedCh);
+      cout << "tablel: " << tablel << endl;
+      char charArr[tablel];
+      file.get(charArr, tablel + p + 1);
+      string str(charArr);
+      json jt = json::parse(str);
+      ttable table = jt.get<ttable>();
+      unsigned char encodedCh[(long int)file.tellg()];
+      string encoded(encodedCh,  encodedCh + sizeof encodedCh / sizeof encodedCh[0]);
+
       return make_tuple(table, encoded);
     }
 };
