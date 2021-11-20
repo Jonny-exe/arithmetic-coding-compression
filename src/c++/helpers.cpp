@@ -1,6 +1,6 @@
 #include<bits/stdc++.h>
 using namespace std;
-string float2bin(double number, int places) {
+string float2bin(double number, int places = 200) {
   double rest, b;
   rest = 0;
   b = 1;
