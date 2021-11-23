@@ -64,6 +64,10 @@ class Coder {
       } else if (position.compare("end") == 0) {
         adder = "1";
       } else if (position.compare("number") == 0) {
+        string f = fullNumber.substr(
+              numberIndex.first, numberIndex.second
+            );
+
         return make_tuple(
             fullNumber.substr(
               numberIndex.first, numberIndex.second
@@ -97,6 +101,7 @@ class Coder {
        start = get<0>(t);
        end = get<1>(t);
        outputs += get<2>(t);
+       cout << "outputs: " << outputs << endl;
      }
 
      LD result = ((end - start) / (LD)2) + start;
@@ -108,7 +113,7 @@ class Coder {
        map<char, pair<LD, LD>> table
    ) {
      string fullEncoded = encodedString;
-     pair<int, int> encodedIdx(0, 400);
+     pair<int, int> encodedIdx(0, 100);
      string encodedNumber = "0." + encodedString.substr(
          encodedIdx.first, encodedIdx.second);
      LD encoded = bin2float(encodedNumber);
@@ -148,7 +153,6 @@ class Coder {
        }
        i++;
      }
-     cout << "I : " << i << endl;
      return decoded;
    }
 
@@ -177,11 +181,16 @@ class Coder {
              numberIndex.first + amount, 
              numberIndex.second + amount
          );
+       } else if (numberIndex.second - amount > numberIndex.first + 1) {
+         numberIndex = make_pair(
+             numberIndex.first + amount, 
+             numberIndex.second
+         );
        }
 
        start = get<0>(leftShift(start, amount, "start"));
        end = get<0>(leftShift(end, amount, "end"));
-       number = get<0>(leftShift(number, amount, "end", fullNumber, numberIndex));
+       number = get<0>(leftShift(number, amount, "number", fullNumber, numberIndex));
 
      } else {
        return make_tuple(initStart, initEnd, initNumber, numberIndex);
