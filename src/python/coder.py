@@ -19,7 +19,7 @@ class Coder:
 
     def decode(self, encoded, table):
         fullencoded = encoded
-        encoded_i = (0, 300)
+        encoded_i = (0, 200)
         encoded_number = "0." + encoded[encoded_i[0] : encoded_i[1]]
         encoded = bin2float(encoded_number)
         start = 0
@@ -28,7 +28,8 @@ class Coder:
         decoded = ""
         while i < self.l:
             if i % 5000 == 0:
-                print(f"{i} / {self.l}")
+                pass
+                # print(f"{i} / {self.l}")
             for key in table.keys():
                 r = table[key]
                 s, e = r[0], r[1]

@@ -2,7 +2,8 @@
 #include "modules/json.hpp"
 
 using json = nlohmann::json;
-typedef map<char, pair<long double, long double>> ttable;
+typedef long double LD;
+typedef map<char, pair<LD, LD>> ttable;
 
 
 class File  {

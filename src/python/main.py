@@ -26,6 +26,7 @@ def save(FILENAME, bin_number, table, length):
 
 def load(FILENAME):
     file = File(FILENAME)
+    print(file.load())
     data, table, l = file.load()
     return data, table, l
 

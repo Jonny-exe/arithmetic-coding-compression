@@ -91,21 +91,18 @@ class Coder {
      string outputs = "";
      for (auto c : text) {
        pair<LD, LD> ranges(pTable[c]);
-       cout << ranges.first << " " << ranges.second << endl;
        LD start1 = newPoint(start, end, ranges.first);
        LD end1 = newPoint(start, end, ranges.second);
-       cout << start1 << " " << end1 << endl;
        tuple<LD, LD, string> t(
            enNormalize(start1, end1)
        );
        start = get<0>(t);
        end = get<1>(t);
        outputs += get<2>(t);
-       cout << "outputs: " << outputs << endl;
      }
 
      LD result = ((end - start) / (LD)2) + start;
-     return outputs + float2bin(result);
+     return outputs + float2bin(result, 600);
    }
    
    string decode(
@@ -113,7 +110,7 @@ class Coder {
        map<char, pair<LD, LD>> table
    ) {
      string fullEncoded = encodedString;
-     pair<int, int> encodedIdx(0, 100);
+     pair<int, int> encodedIdx(0, 300);
      string encodedNumber = "0." + encodedString.substr(
          encodedIdx.first, encodedIdx.second);
      LD encoded = bin2float(encodedNumber);
@@ -131,7 +128,6 @@ class Coder {
          LD smaller = newPoint(start, end, e);
          if (encoded >= bigger && encoded < smaller) {
            decoded += item.first;
-           cout << "I : " << i << endl;
            LD start1, end1;
            start1 = newPoint(start, end, s);
            end1 = newPoint(start, end, e);
@@ -243,7 +239,8 @@ class Coder {
 
 
 int main() {
-  string text =  "hello I am your fat";
+  string text;
+  getline(cin, text);
   cout << text << " " << text.length();
   Coder en(text.length(), text, "encode");
   string out = en.output;
@@ -252,7 +249,6 @@ int main() {
   file.write(en.pTable, en.output, (int)en.l);
   tuple<ttable, string, int> data = file.read();
 
-  //Coder de(get<2>(data), get<1>(data), "decode", get<0>(data));
   Coder de(text.length(), en.output, "decode", en.pTable);
   cout << "output: " << de.output << " " << de.output.length() << endl;
 }

@@ -15,18 +15,21 @@ class File:
 
         if ftype != "JZIP":
             # Raise error
+            raise ValueError("File header doesn't match")
             return
 
         f.seek(4)
         versionb = f.read(4)
-        version = struct.unpack("!I", versionb)[0]
+        version = struct.unpack("i", versionb)[0]
 
         if version != 1:
-            return
+            pass
+            # raise Exception("Version number doesn't match")
+            # return
 
         f.seek(8)
         lb = f.read(4)
-        l = struct.unpack("!I", lb)[0]
+        l = struct.unpack("i", lb)[0]
 
         f.seek(12)
         tablelb = f.read(4)
@@ -54,10 +57,10 @@ class File:
         s = "JZIP"
         f.write(bytes(s, "utf-8"))
 
-        n = struct.pack("!I", 1)
+        n = struct.pack("i", 1)
         f.write(n)
 
-        l = struct.pack("!I", l)
+        l = struct.pack("i", l)
         f.write(l)
 
         table = pickle.dumps(table)
