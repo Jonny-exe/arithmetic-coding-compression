@@ -1,6 +1,7 @@
 # arithmetic-coding-compression
 
 This is an implementation (written in python, c++ version doesn't work) of arithmetic coding for compression.
+You can find the principals of arithmetic coding [here](https://en.wikipedia.org/wiki/Arithmetic_coding)
 
 Note: this is not made for serious use
 
